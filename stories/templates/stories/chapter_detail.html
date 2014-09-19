@@ -1,0 +1,64 @@
+{% extends 'general/base.html' %}
+
+{% load staticfiles %}
+{% load html_tag_modifiers %}
+
+{% block title %}{{ chapter.headline }} | {{ block.super }}{% endblock %}
+
+
+{% block content %}
+    <div class="row">
+        <div class="col-md-8 col-md-offset-2">
+            
+            <h3>{{ chapter.story.title }}</h3>
+            <hr/>
+            
+            {% if chapter.parent %}
+                <a href="{% url 'chapter_detail' chapter.parent.pk %}">back</a>
+            {% endif %}
+            <h4>{{ chapter.headline }}</h4>
+            <p>{{ chapter.body }}</p>
+            <ul>
+                {% for child in chapter_children %}
+                    <li><a href="{% url 'chapter_detail' child.pk %}">{{ child.headline }}</a></li>
+                {% empty %}
+                    <li>the end.</li>
+                {% endfor %}
+            </ul>
+            <hr/>
+            
+            {% if user.is_authenticated %}
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <p class="panel-title">
+                            <a data-toggle="collapse" href="#add-chapter">Suggest your own continuation</a>
+                        </p>
+                    </div>
+                    <div id="add-chapter" class="panel-collapse collapse">
+                        <div class="panel-body">
+                            <form method="post" role="form">
+                                {% csrf_token %}
+                                {{ form.non_field_errors }}
+                                {% for field in form %}
+                                    {% if not field.is_hidden %}
+                                        <div class="form-group">
+                                            {{ field.label_tag }}
+                                            {{ field|add_class:"form-control" }}
+                                            <p class="text-danger">
+                                                {% for e in field.errors %}{{ e }}{% endfor %}
+                                            </p>
+                                        </div>
+                                    {% endif %}
+                                {% endfor %}
+                                <button class="btn btn-default">add</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            {% else %}
+                <p><a href="{% url 'login' %}">login </a>to suggest your own continuation</p>
+            {% endif %}
+            
+        </div>
+    </div>
+{% endblock %}
